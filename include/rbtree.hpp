@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ostream>
+#include <stack>
 #include <string>
 #include <cassert>
 
@@ -27,14 +28,6 @@ class Tree {
 
         Node(const Node& rhs) = delete;
         Node &operator=(const Node& rhs) = delete;
-
-        ~Node() {
-            //TODO: find a better solution
-            if (left_ != this)
-                delete left_;
-            if (right_ != this)
-                delete right_;
-        }
 
         void make_nil() {
             parent_ = this;
@@ -125,12 +118,30 @@ public:
         root_ = tree_nil_;
     }
     ~Tree() {
-        delete root_;
+        std::stack<Node *> stack;
+        Node * node = root_;
+
+        while (true) {
+            while (node != tree_nil_) {
+                stack.push(node);
+                node = node->left_;
+            }
+
+            if (stack.empty())
+                break;
+
+            Node * prev_node = stack.top();
+            stack.pop();
+
+            node = prev_node->right_;
+            delete prev_node;
+        }
+
         delete tree_nil_;
     }
+
     Tree(const Tree& rhs) = delete;
     Tree &operator=(const Tree& rhs) = delete;
-
 
     void insert(const T& key) {
         Node *new_node = new Node(key, Color::red);
