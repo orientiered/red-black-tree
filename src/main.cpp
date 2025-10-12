@@ -1,7 +1,9 @@
 #include <iostream>
 
+#include "rbtree.hpp"
+
 int main() {
-    std::cout << std::string("Hello\n").c_str();
+    RBTree::Tree<int> tree;
 
     std::string input = "";
     while (std::cin >> input) {
