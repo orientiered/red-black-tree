@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <ostream>
 #include <stack>
 #include <string>
@@ -7,7 +8,23 @@
 
 namespace RBTree {
 
-template <typename T>
+enum class Order {
+    less,
+    equal,
+    greater
+};
+
+template<typename T, typename CompT>
+Order compare(const T &lhs, const T &rhs) {
+    if (CompT{}(lhs, rhs))
+        return Order::less;
+    else if (CompT{}(rhs, lhs))
+        return Order::greater;
+
+    return Order::equal;
+}
+
+template <typename T, typename CompT = std::less<T>>
 class Tree {
     enum class Color {
         black,
@@ -113,8 +130,8 @@ public:
 
 };
 
-template <typename T>
-void Tree<T>::print_sorted(std::ostream &stream, iterator node) const {
+template <typename T, typename CompT>
+void Tree<T, CompT>::print_sorted(std::ostream &stream, iterator node) const {
     if (node == tree_nil_)
         return;
 
@@ -123,8 +140,8 @@ void Tree<T>::print_sorted(std::ostream &stream, iterator node) const {
     print_sorted(stream, node->right_);
 }
 
-template <typename T>
-void Tree<T>::print_debug(std::ostream &stream, iterator node, unsigned indent) const {
+template <typename T, typename CompT>
+void Tree<T, CompT>::print_debug(std::ostream &stream, iterator node, unsigned indent) const {
     if (node == tree_nil_)
         return;
 
@@ -140,8 +157,8 @@ void Tree<T>::print_debug(std::ostream &stream, iterator node, unsigned indent) 
     print_debug(stream, node->right_, indent + 1);
 }
 
-template <typename T>
-void Tree<T>::print_dot_debug_recursive(std::ostream &stream, iterator node) const {
+template <typename T, typename CompT>
+void Tree<T, CompT>::print_dot_debug_recursive(std::ostream &stream, iterator node) const {
     if (node == tree_nil_)
         return;
 
@@ -161,38 +178,45 @@ void Tree<T>::print_dot_debug_recursive(std::ostream &stream, iterator node) con
     print_dot_debug_recursive(stream, node->right_);
 }
 
-template <typename T>
-void Tree<T>::print_dot_debug(std::ostream &stream, iterator node) const {
+template <typename T, typename CompT>
+void Tree<T, CompT>::print_dot_debug(std::ostream &stream, iterator node) const {
     stream << "digraph {\n"
               "graph [splines=line]\n";
     print_dot_debug_recursive(stream, node);
     stream << "}\n";
 }
 
-template <typename T>
-void Tree<T>::insert(const T& key) {
-    Node *new_node = new Node(key, Color::red);
-    new_node->left_ = new_node->right_ = new_node->parent_ = tree_nil_;
-
+template <typename T, typename CompT>
+void Tree<T, CompT>::insert(const T& key) {
     Node *prev = tree_nil_;
     Node *cur = root_;
 
     while (cur != tree_nil_) {
         prev = cur;
-        if (new_node->key_ < cur->key_) {
+        switch(compare<T, CompT>(key, cur->key_)) {
+        case Order::less:
             cur = cur->left_;
-        } else {
+            break;
+        case Order::greater:
             cur = cur->right_;
+            break;
+        case Order::equal: default:
+            // equals so do not insert
+            return;
         }
     }
 
+    // TODO: reduce number of comps
+    Node *new_node = new Node(key, Color::red);
+    new_node->left_ = new_node->right_ = tree_nil_;
     // cur is leaf, prev is its parent
     new_node->parent_ = prev;
+
     // empty tree
     if (prev == tree_nil_) {
         root_ = new_node;
     // othwerise put new node to the correct subtree
-    } else if (new_node->key_ < prev->key_) {
+    } else if (compare<T, CompT>(new_node->key_, prev->key_) == Order::less) {
         prev->left_ = new_node;
     } else {
         prev->right_ = new_node;
@@ -201,8 +225,8 @@ void Tree<T>::insert(const T& key) {
     insert_fixup(new_node);
 }
 
-template <typename T>
-void Tree<T>::insert_fixup(Node *node) {
+template <typename T, typename CompT>
+void Tree<T, CompT>::insert_fixup(Node *node) {
     while (node->parent_->color_ == Color::red)
     {
         if (node->parent_ == node->parent_->parent_->left_) {
@@ -244,8 +268,8 @@ void Tree<T>::insert_fixup(Node *node) {
     root_->color_ = Color::black;
 }
 
-template <typename T>
-void Tree<T>::left_rotate(Node *node) {
+template <typename T, typename CompT>
+void Tree<T, CompT>::left_rotate(Node *node) {
     /*
           x                y
         a   y    -->     x   c
@@ -283,8 +307,8 @@ void Tree<T>::left_rotate(Node *node) {
     x->parent_ = y;
 }
 
-template <typename T>
-void Tree<T>::right_rotate(Node *node) {
+template <typename T, typename CompT>
+void Tree<T, CompT>::right_rotate(Node *node) {
     /*
         x           y
       y   c  -->  a   x
@@ -321,5 +345,49 @@ void Tree<T>::right_rotate(Node *node) {
     y->right_ = x;
     x->parent_ = y;
 }
+
+/// Returns an iterator pointing to the first element that is not less than key.
+template<typename T, typename CompT>
+Tree<T, CompT>::iterator Tree<T, CompT>::lower_bound(const T& key) const {
+    Node *node = root_;
+    Node *last_closest = tree_nil_;
+
+    while (node != tree_nil_) {
+        switch(compare<T, CompT>(key, node->key_)) {
+        case Order::less:
+            last_closest = node;
+            node = node->left_;
+            break;
+        case Order::greater:
+            node = node->right_;
+            break;
+        case Order::equal: default:
+            return node;
+        }
+    }
+    return last_closest;
+}
+
+/// Returns an iterator pointing to the first element that is greater than key.
+template<typename T, typename CompT>
+Tree<T, CompT>::iterator Tree<T, CompT>::upper_bound(const T& key) const {
+    Node *node = root_;
+    Node *last_closest = tree_nil_;
+
+    while (node != tree_nil_) {
+        switch(compare<T, CompT>(key, node->key_)) {
+        case Order::less:
+            last_closest = node;
+            node = node->left_;
+            break;
+        case Order::greater:
+        case Order::equal: default:
+            node = node->right_;
+            break;
+        }
+    }
+    return last_closest;
+}
+
 
 }; // namespace RBTree

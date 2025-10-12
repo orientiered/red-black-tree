@@ -26,6 +26,14 @@ int main(int argc, const char *argv[]) {
             int fst = 0, snd = 0;
             std::cin >> fst >> snd;
             if (verbose) std::cout << "Range query " << fst << " " << snd << "\n";
+        } else if (input == "l") {
+            int left = 0;
+            std::cin >> left;
+            if (verbose) std::cout << "Lower bound " << tree.lower_bound(left) << "\n";
+        } else if (input == "u") {
+            int right = 0;
+            std::cin >> right;
+            if (verbose) std::cout << "Upper bound " << tree.upper_bound(right) << "\n";
         }
     }
 
