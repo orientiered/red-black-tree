@@ -68,47 +68,7 @@ class Tree {
     */
     void right_rotate(Node *node);
 
-    void insert_fixup(Node *node) {
-        while (node->parent_->color_ == Color::red)
-        {
-            if (node->parent_ == node->parent_->parent_->left_)
-            {
-                Node *y = node->parent_->parent_->right_;
-                if (y->color_ == Color::red) {
-                    node->parent_->color_ = Color::black;
-                    y->color_ = Color::black;
-                    node->parent_->parent_->color_ = Color::red;
-                    node = node->parent_->parent_;
-                } else {
-                    if (node == node->parent_->right_) {
-                        node = node->parent_;
-                        left_rotate(node);
-                    }
-                    node->parent_->color_ = Color::black;
-                    node->parent_->parent_->color_ = Color::red;
-                    right_rotate(node->parent_->parent_);
-                }
-            } else {
-                Node *y = node->parent_->parent_->left_;
-                if (y->color_ == Color::red) {
-                    node->parent_->color_ = Color::black;
-                    y->color_ = Color::black;
-                    node->parent_->parent_->color_ = Color::red;
-                    node = node->parent_->parent_;
-                } else {
-                    if (node == node->parent_->left_) {
-                        node = node->parent_;
-                        right_rotate(node);
-                    }
-                    node->parent_->color_ = Color::black;
-                    node->parent_->parent_->color_ = Color::red;
-                    left_rotate(node->parent_->parent_);
-                }
-            }
-        }
-
-        root_->color_ = Color::black;
-    }
+    void insert_fixup(Node *node);
 public:
     using iterator = Node *;
 
@@ -143,36 +103,7 @@ public:
     Tree(const Tree& rhs) = delete;
     Tree &operator=(const Tree& rhs) = delete;
 
-    void insert(const T& key) {
-        Node *new_node = new Node(key, Color::red);
-        new_node->left_ = new_node->right_ = new_node->parent_ = tree_nil_;
-
-        Node *prev = tree_nil_;
-        Node *cur = root_;
-
-        while (cur != tree_nil_) {
-            prev = cur;
-            if (new_node->key_ < cur->key_) {
-                cur = cur->left_;
-            } else {
-                cur = cur->right_;
-            }
-        }
-
-        // cur is leaf, prev is its parent
-        new_node->parent_ = prev;
-        // empty tree
-        if (prev == tree_nil_) {
-            root_ = new_node;
-        // othwerise put new node to the correct subtree
-        } else if (new_node->key_ < prev->key_) {
-            prev->left_ = new_node;
-        } else {
-            prev->right_ = new_node;
-        }
-
-        insert_fixup(new_node);
-    }
+    void insert(const T& key);
 
     iterator get_root() const {
         return root_;
@@ -207,6 +138,81 @@ void Tree<T>::print_debug(std::ostream &stream, iterator node, int indent) const
     node->print_debug(stream, indent);
     print_debug(stream, node->left_, indent + 1);
     print_debug(stream, node->right_, indent + 1);
+}
+
+template <typename T>
+void Tree<T>::insert(const T& key) {
+    Node *new_node = new Node(key, Color::red);
+    new_node->left_ = new_node->right_ = new_node->parent_ = tree_nil_;
+
+    Node *prev = tree_nil_;
+    Node *cur = root_;
+
+    while (cur != tree_nil_) {
+        prev = cur;
+        if (new_node->key_ < cur->key_) {
+            cur = cur->left_;
+        } else {
+            cur = cur->right_;
+        }
+    }
+
+    // cur is leaf, prev is its parent
+    new_node->parent_ = prev;
+    // empty tree
+    if (prev == tree_nil_) {
+        root_ = new_node;
+    // othwerise put new node to the correct subtree
+    } else if (new_node->key_ < prev->key_) {
+        prev->left_ = new_node;
+    } else {
+        prev->right_ = new_node;
+    }
+
+    insert_fixup(new_node);
+}
+
+template <typename T>
+void Tree<T>::insert_fixup(Node *node) {
+    while (node->parent_->color_ == Color::red)
+    {
+        if (node->parent_ == node->parent_->parent_->left_) {
+            Node *y = node->parent_->parent_->right_;
+            if (y->color_ == Color::red) {
+                node->parent_->color_ = Color::black;
+                y->color_ = Color::black;
+                node->parent_->parent_->color_ = Color::red;
+                node = node->parent_->parent_;
+            } else {
+                if (node == node->parent_->right_) {
+                    node = node->parent_;
+                    left_rotate(node);
+                }
+                node->parent_->color_ = Color::black;
+                node->parent_->parent_->color_ = Color::red;
+                right_rotate(node->parent_->parent_);
+            }
+        }
+        else {
+            Node *y = node->parent_->parent_->left_;
+            if (y->color_ == Color::red) {
+                node->parent_->color_ = Color::black;
+                y->color_ = Color::black;
+                node->parent_->parent_->color_ = Color::red;
+                node = node->parent_->parent_;
+            } else {
+                if (node == node->parent_->left_) {
+                    node = node->parent_;
+                    right_rotate(node);
+                }
+                node->parent_->color_ = Color::black;
+                node->parent_->parent_->color_ = Color::red;
+                left_rotate(node->parent_->parent_);
+            }
+        }
+    }
+
+    root_->color_ = Color::black;
 }
 
 template <typename T>
