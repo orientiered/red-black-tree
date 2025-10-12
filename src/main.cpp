@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 
 #include "rbtree.hpp"
@@ -39,8 +40,17 @@ int main(int argc, const char *argv[]) {
     tree.print_sorted(std::cout, tree.get_root());
     std::cout << "\n";
 
-    if (verbose)
+    if (verbose) {
         tree.print_debug(std::cout, tree.get_root());
+        std::string file_name = "graph.dot";
+        std::fstream file(file_name, std::ios::out | std::ios::trunc);
+        if (!file.good()) {
+            std::cout << "Failed to open dot file\n";
+        }
+        tree.print_dot_debug(file, tree.get_root());
+        file.close();
+        std::system(("dot " + file_name + " -Tpng -o graph.png").c_str());
+    }
 
     return 0;
 }
