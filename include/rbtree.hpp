@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <ostream>
 #include <stack>
 #include <string>
@@ -7,7 +8,7 @@
 
 namespace RBTree {
 
-template <typename T>
+template <typename T, typename CompT = std::less<T>>
 class Tree {
     enum class Color {
         black,
@@ -120,8 +121,8 @@ public:
     void print_debug(std::ostream &stream, iterator node, int indent = 0) const;
 };
 
-template <typename T>
-void Tree<T>::print_sorted(std::ostream &stream, iterator node) const {
+template <typename T, typename CompT>
+void Tree<T, CompT>::print_sorted(std::ostream &stream, iterator node) const {
     if (node == tree_nil_)
         return;
 
@@ -130,8 +131,8 @@ void Tree<T>::print_sorted(std::ostream &stream, iterator node) const {
     print_sorted(stream, node->right_);
 }
 
-template <typename T>
-void Tree<T>::print_debug(std::ostream &stream, iterator node, int indent) const {
+template <typename T, typename CompT>
+void Tree<T, CompT>::print_debug(std::ostream &stream, iterator node, int indent) const {
     if (node == tree_nil_)
         return;
 
@@ -140,30 +141,34 @@ void Tree<T>::print_debug(std::ostream &stream, iterator node, int indent) const
     print_debug(stream, node->right_, indent + 1);
 }
 
-template <typename T>
-void Tree<T>::insert(const T& key) {
-    Node *new_node = new Node(key, Color::red);
-    new_node->left_ = new_node->right_ = new_node->parent_ = tree_nil_;
-
+template <typename T, typename CompT>
+void Tree<T, CompT>::insert(const T& key) {
     Node *prev = tree_nil_;
     Node *cur = root_;
 
     while (cur != tree_nil_) {
         prev = cur;
-        if (new_node->key_ < cur->key_) {
+        if (CompT{}(key, cur->key_)) {
             cur = cur->left_;
-        } else {
+        } else if (CompT{}(cur->key_, key)) {
             cur = cur->right_;
+        }
+        else {
+            // equals so do not insert
+            return;
         }
     }
 
+    Node *new_node = new Node(key, Color::red);
+    new_node->left_ = new_node->right_ = tree_nil_;
     // cur is leaf, prev is its parent
     new_node->parent_ = prev;
+
     // empty tree
     if (prev == tree_nil_) {
         root_ = new_node;
     // othwerise put new node to the correct subtree
-    } else if (new_node->key_ < prev->key_) {
+    } else if (CompT{}(new_node->key_, prev->key_)) {
         prev->left_ = new_node;
     } else {
         prev->right_ = new_node;
@@ -172,8 +177,8 @@ void Tree<T>::insert(const T& key) {
     insert_fixup(new_node);
 }
 
-template <typename T>
-void Tree<T>::insert_fixup(Node *node) {
+template <typename T, typename CompT>
+void Tree<T, CompT>::insert_fixup(Node *node) {
     while (node->parent_->color_ == Color::red)
     {
         if (node->parent_ == node->parent_->parent_->left_) {
@@ -215,8 +220,8 @@ void Tree<T>::insert_fixup(Node *node) {
     root_->color_ = Color::black;
 }
 
-template <typename T>
-void Tree<T>::left_rotate(Node *node) {
+template <typename T, typename CompT>
+void Tree<T, CompT>::left_rotate(Node *node) {
     /*
           x                y
         a   y    -->     x   c
@@ -254,8 +259,8 @@ void Tree<T>::left_rotate(Node *node) {
     x->parent_ = y;
 }
 
-template <typename T>
-void Tree<T>::right_rotate(Node *node) {
+template <typename T, typename CompT>
+void Tree<T, CompT>::right_rotate(Node *node) {
     /*
         x           y
       y   c  -->  a   x
