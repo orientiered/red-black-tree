@@ -21,6 +21,6 @@ int main() {
         }
     }
 
-    tree.print_sorted(std::cout, tree.get_root());
+    tree.print_debug(std::cerr, tree.get_root());
     return 0;
 }

@@ -44,17 +44,17 @@ class Tree {
         }
 
         /* DEBUG FUNCTIONS HERE */
-        void print_debug(std::ostream stream, int indent) const {
+        void print_debug(std::ostream &stream, int indent) const {
             std::string indent_str;
             for (int i = 0; i < indent; i++)
                 indent_str += "\t";
 
             stream << indent_str << "Node " << this << ":\n";
-            stream << indent_str << "\t" << "color = " << ((color_ == Color::black) ? "black" : "red") << "\n";
-            stream << indent_str << "\t" << "key = " << key_ << "\n";
-            stream << indent_str << "\t" << "parent " << parent_ << "\n";
-            stream << indent_str << "\t" << "left   " << left_   << "\n";
-            stream << indent_str << "\t" << "right  " << right_  << "\n";
+            stream << indent_str << "color = " << ((color_ == Color::black) ? "black" : "red") << "\n";
+            stream << indent_str << "key = " << key_ << "\n";
+            stream << indent_str << "parent " << parent_ << "\n";
+            stream << indent_str << "left   " << left_   << "\n";
+            stream << indent_str << "right  " << right_  << "\n";
         }
     };
 
@@ -134,6 +134,7 @@ public:
 
     void insert(const T& key) {
         Node *new_node = new Node(key, Color::red);
+        new_node->left_ = new_node->right_ = new_node->parent_ = tree_nil_;
 
         Node *prev = tree_nil_;
         Node *cur = root_;
@@ -179,16 +180,19 @@ public:
 
 template <typename T>
 void Tree<T>::print_sorted(std::ostream &stream, iterator node) const {
-    if (node == nullptr)
+    if (node == tree_nil_)
         return;
 
     print_sorted(stream,  node->left_);
-    stream << node << " ";
+    stream << node->key_ << " ";
     print_sorted(stream, node->right_);
 }
 
 template <typename T>
 void Tree<T>::print_debug(std::ostream &stream, iterator node, int indent) const {
+    if (node == tree_nil_)
+        return;
+
     node->print_debug(stream, indent);
     print_debug(stream, node->left_, indent + 1);
     print_debug(stream, node->right_, indent + 1);
