@@ -36,19 +36,6 @@ class Tree {
             color_ = Color::black;
         }
 
-        /* DEBUG FUNCTIONS HERE */
-        void print_debug(std::ostream &stream, int indent) const {
-            std::string indent_str;
-            for (int i = 0; i < indent; i++)
-                indent_str += "\t";
-
-            stream << indent_str << "Node " << this << ":\n";
-            stream << indent_str << "color = " << ((color_ == Color::black) ? "black" : "red") << "\n";
-            stream << indent_str << "key = " << key_ << "\n";
-            stream << indent_str << "parent " << parent_ << "\n";
-            stream << indent_str << "left   " << left_   << "\n";
-            stream << indent_str << "right  " << right_  << "\n";
-        }
     };
 
     Node *root_ = nullptr;
@@ -69,6 +56,9 @@ class Tree {
     void right_rotate(Node *node);
 
     void insert_fixup(Node *node);
+
+    void print_dot_debug_recursive(std::ostream &stream, Node *node) const;
+
 public:
     using iterator = Node *;
 
@@ -117,7 +107,10 @@ public:
     /* DEBUG FUNCTIONS HERE */
     void print_sorted(std::ostream &stream, iterator node) const;
 
-    void print_debug(std::ostream &stream, iterator node, int indent = 0) const;
+    void print_debug(std::ostream &stream, iterator node, unsigned indent = 0) const;
+
+    void print_dot_debug(std::ostream &stream, iterator node) const;
+
 };
 
 template <typename T>
@@ -131,13 +124,49 @@ void Tree<T>::print_sorted(std::ostream &stream, iterator node) const {
 }
 
 template <typename T>
-void Tree<T>::print_debug(std::ostream &stream, iterator node, int indent) const {
+void Tree<T>::print_debug(std::ostream &stream, iterator node, unsigned indent) const {
     if (node == tree_nil_)
         return;
 
-    node->print_debug(stream, indent);
+    std::string indent_str(indent, '\t');
+
+    stream << indent_str << "Node " << node << ":\n";
+    stream << indent_str << "color = " << ((node->color_ == Color::black) ? "black" : "red") << "\n";
+    stream << indent_str << "key = " << node->key_ << "\n";
+    stream << indent_str << "parent " << node->parent_ << "\n";
+    stream << indent_str << "left   " << node->left_   << "\n";
+    stream << indent_str << "right  " << node->right_  << "\n";
     print_debug(stream, node->left_, indent + 1);
     print_debug(stream, node->right_, indent + 1);
+}
+
+template <typename T>
+void Tree<T>::print_dot_debug_recursive(std::ostream &stream, iterator node) const {
+    if (node == tree_nil_)
+        return;
+
+    std::string fillcolor = (node->color_ == Color::black) ? "#D5D5D5FF": "#F54927";
+    stream << "\t" << "node" << node << "[shape = Mrecord, label = \"{"
+            << "node[" << node << "] | parent[" << node->parent_ << "] | "
+            << node->key_ << " | "
+            << "{<left> L | <right> R}}\""
+            << ", style = filled, fillcolor = \"" << fillcolor << "\"];\n";
+
+    if (node->left_ != tree_nil_)
+        stream << "\tnode" << node << ":<left> -> node" << node->left_ << ";\n";
+    if (node->right_ != tree_nil_)
+        stream << "\tnode" << node << ":<right> -> node" << node->right_ << ";\n";
+
+    print_dot_debug_recursive(stream, node->left_);
+    print_dot_debug_recursive(stream, node->right_);
+}
+
+template <typename T>
+void Tree<T>::print_dot_debug(std::ostream &stream, iterator node) const {
+    stream << "digraph {\n"
+              "graph [splines=line]\n";
+    print_dot_debug_recursive(stream, node);
+    stream << "}\n";
 }
 
 template <typename T>
