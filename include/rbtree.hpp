@@ -76,45 +76,45 @@ class Tree {
     void right_rotate(Node *node);
 
     void insert_fixup(Node *node) {
-        while (node->parent_->color == Color::red)
+        while (node->parent_->color_ == Color::red)
         {
-            if (node->parent_ == node->parent_->parent->left)
+            if (node->parent_ == node->parent_->parent_->left_)
             {
-                Node *y = node->parent_->parent->right;
+                Node *y = node->parent_->parent_->right_;
                 if (y->color_ == Color::red) {
-                    node->parent_->color = Color::black;
+                    node->parent_->color_ = Color::black;
                     y->color_ = Color::black;
-                    node->parent_->parent->color = Color::red;
-                    node = node->parent_->parent;
+                    node->parent_->parent_->color_ = Color::red;
+                    node = node->parent_->parent_;
                 } else {
-                    if (node == node->parent_->right) {
+                    if (node == node->parent_->right_) {
                         node = node->parent_;
                         left_rotate(node);
                     }
-                    node->parent_->color = Color::black;
-                    node->parent_->parent->color = Color::red;
-                    right_rotate(node->parent_->parent);
+                    node->parent_->color_ = Color::black;
+                    node->parent_->parent_->color_ = Color::red;
+                    right_rotate(node->parent_->parent_);
                 }
             } else {
-                Node *y = node->parent_->parent->left;
+                Node *y = node->parent_->parent_->left_;
                 if (y->color_ == Color::red) {
-                    node->parent_->color = Color::black;
+                    node->parent_->color_ = Color::black;
                     y->color_ = Color::black;
-                    node->parent_->parent->color = Color::red;
-                    node = node->parent_->parent;
+                    node->parent_->parent_->color_ = Color::red;
+                    node = node->parent_->parent_;
                 } else {
-                    if (node == node->parent_->left) {
+                    if (node == node->parent_->left_) {
                         node = node->parent_;
                         right_rotate(node);
                     }
-                    node->parent_->color = Color::black;
-                    node->parent_->parent->color = Color::red;
-                    left_rotate(node->parent_->parent);
+                    node->parent_->color_ = Color::black;
+                    node->parent_->parent_->color_ = Color::red;
+                    left_rotate(node->parent_->parent_);
                 }
             }
         }
 
-        root_->color_ = Color::BLACK;
+        root_->color_ = Color::black;
     }
 public:
     using iterator = Node *;
@@ -122,6 +122,7 @@ public:
     Tree() {
         tree_nil_ = new Node(T());
         tree_nil_->make_nil();
+        root_ = tree_nil_;
     }
     ~Tree() {
         delete root_;
@@ -171,13 +172,13 @@ public:
     int distance(iterator fst, iterator snd) const;
 
     /* DEBUG FUNCTIONS HERE */
-    void print_sorted(std::ostream stream, iterator node) const;
+    void print_sorted(std::ostream &stream, iterator node) const;
 
-    void print_debug(std::ostream stream, iterator node, int indent = 0) const;
+    void print_debug(std::ostream &stream, iterator node, int indent = 0) const;
 };
 
 template <typename T>
-void Tree<T>::print_sorted(std::ostream stream, iterator node) const {
+void Tree<T>::print_sorted(std::ostream &stream, iterator node) const {
     if (node == nullptr)
         return;
 
@@ -187,7 +188,7 @@ void Tree<T>::print_sorted(std::ostream stream, iterator node) const {
 }
 
 template <typename T>
-void Tree<T>::print_debug(std::ostream stream, iterator node, int indent) const {
+void Tree<T>::print_debug(std::ostream &stream, iterator node, int indent) const {
     node->print_debug(stream, indent);
     print_debug(stream, node->left_, indent + 1);
     print_debug(stream, node->right_, indent + 1);
@@ -211,7 +212,7 @@ void Tree<T>::left_rotate(Node *node) {
 
     // b parent
     if (y->left_ != tree_nil_) {
-        y->left_->parent = x;
+        y->left_->parent_ = x;
     }
 
     // y parent
@@ -221,11 +222,11 @@ void Tree<T>::left_rotate(Node *node) {
     if (x->parent_ == tree_nil_) {
         root_ = y;
     // x was left subtree
-    } else if (x == x->parent_->left) {
-        x->parent_->left = y;
+    } else if (x == x->parent_->left_) {
+        x->parent_->left_ = y;
     // x was right subtree
     } else {
-        x->parent_->right = y;
+        x->parent_->right_ = y;
     }
 
     y->left_ = x;
@@ -250,7 +251,7 @@ void Tree<T>::right_rotate(Node *node) {
 
     // b parent
     if (y->right_ != tree_nil_) {
-        y->right_->parent = x;
+        y->right_->parent_ = x;
     }
 
     // y parent
@@ -260,11 +261,11 @@ void Tree<T>::right_rotate(Node *node) {
     if (x->parent_ == tree_nil_) {
         root_ = y;
     // x was left subtree
-    } else if (x == x->parent_->left) {
-        x->parent_->left = y;
+    } else if (x == x->parent_->left_) {
+        x->parent_->left_ = y;
     // x was right subtree
     } else {
-        x->parent_->right = y;
+        x->parent_->right_ = y;
     }
 
     y->right_ = x;

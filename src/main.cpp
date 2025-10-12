@@ -12,6 +12,7 @@ int main() {
             std::cin >> key;
 
             std::cout << "Add key " << key << "\n";
+            tree.insert(key);
         } else if (input == "q") {
             int fst = 0, snd = 0;
             std::cin >> fst >> snd;
@@ -19,5 +20,7 @@ int main() {
             std::cout << "Range query " << fst << " " << snd << "\n";
         }
     }
+
+    tree.print_sorted(std::cout, tree.get_root());
     return 0;
 }
