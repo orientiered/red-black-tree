@@ -8,6 +8,22 @@
 
 namespace RBTree {
 
+enum class Order {
+    less,
+    equal,
+    greater
+};
+
+template<typename T, typename CompT>
+Order compare(const T &lhs, const T &rhs) {
+    if (CompT{}(lhs, rhs))
+        return Order::less;
+    else if (CompT{}(rhs, lhs))
+        return Order::greater;
+
+    return Order::equal;
+}
+
 template <typename T, typename CompT = std::less<T>>
 class Tree {
     enum class Color {
@@ -148,17 +164,20 @@ void Tree<T, CompT>::insert(const T& key) {
 
     while (cur != tree_nil_) {
         prev = cur;
-        if (CompT{}(key, cur->key_)) {
+        switch(compare<T, CompT>(key, cur->key_)) {
+        case Order::less:
             cur = cur->left_;
-        } else if (CompT{}(cur->key_, key)) {
+            break;
+        case Order::greater:
             cur = cur->right_;
-        }
-        else {
+            break;
+        case Order::equal: default:
             // equals so do not insert
             return;
         }
     }
 
+    // TODO: reduce number of comps
     Node *new_node = new Node(key, Color::red);
     new_node->left_ = new_node->right_ = tree_nil_;
     // cur is leaf, prev is its parent
@@ -168,7 +187,7 @@ void Tree<T, CompT>::insert(const T& key) {
     if (prev == tree_nil_) {
         root_ = new_node;
     // othwerise put new node to the correct subtree
-    } else if (CompT{}(new_node->key_, prev->key_)) {
+    } else if (compare<T, CompT>(new_node->key_, prev->key_) == Order::less) {
         prev->left_ = new_node;
     } else {
         prev->right_ = new_node;
@@ -297,5 +316,49 @@ void Tree<T, CompT>::right_rotate(Node *node) {
     y->right_ = x;
     x->parent_ = y;
 }
+
+/// Returns an iterator pointing to the first element that is not less than key.
+template<typename T, typename CompT>
+Tree<T, CompT>::iterator Tree<T, CompT>::lower_bound(const T& key) const {
+    Node *node = root_;
+    Node *last_closest = tree_nil_;
+
+    while (node != tree_nil_) {
+        switch(compare<T, CompT>(key, node->key_)) {
+        case Order::less:
+            last_closest = node;
+            node = node->left_;
+            break;
+        case Order::greater:
+            node = node->right_;
+            break;
+        case Order::equal: default:
+            return node;
+        }
+    }
+    return last_closest;
+}
+
+/// Returns an iterator pointing to the first element that is greater than key.
+template<typename T, typename CompT>
+Tree<T, CompT>::iterator Tree<T, CompT>::upper_bound(const T& key) const {
+    Node *node = root_;
+    Node *last_closest = tree_nil_;
+
+    while (node != tree_nil_) {
+        switch(compare<T, CompT>(key, node->key_)) {
+        case Order::less:
+            last_closest = node;
+            node = node->left_;
+            break;
+        case Order::greater:
+        case Order::equal: default:
+            node = node->right_;
+            break;
+        }
+    }
+    return last_closest;
+}
+
 
 }; // namespace RBTree
