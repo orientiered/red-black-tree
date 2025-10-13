@@ -46,13 +46,14 @@ class Tree {
         Node(const Node& rhs) = delete;
         Node &operator=(const Node& rhs) = delete;
 
+        bool is_nil() const { return this == parent_; }
+
         void make_nil() {
             parent_ = this;
             right_  = this;
             left_   = this;
             color_ = Color::black;
         }
-
     };
 
     Node *root_ = nullptr;
@@ -74,10 +75,41 @@ class Tree {
 
     void insert_fixup(Node *node);
 
-    void print_dot_debug_recursive(std::ostream &stream, Node *node) const;
-
+    void print_dot_debug_recursive(std::ostream &stream, const Node *node) const;
 public:
-    using iterator = Node *;
+    struct iterator {
+        const Node *ptr_;
+        iterator(const Node *node): ptr_(node) {}
+
+        const T& operator*() const { return ptr_->key_; }
+
+        iterator& operator++() {
+            assert(!ptr_->is_nil());
+
+            if (!ptr_->right_->is_nil()) {
+                ptr_ = ptr_->right_;
+                while (!ptr_->left_->is_nil()) {
+                    ptr_ = ptr_->left_;
+                }
+                return *this;
+            } else {
+                // const Node *parent = ptr_->parent_;
+                while (ptr_->parent_->right_ == ptr_) {
+                    ptr_ = ptr_->parent_;
+                }
+                ptr_ = ptr_->parent_;
+
+                return *this;
+
+            }
+        }
+
+        bool is_end() const {
+            return ptr_->is_nil();
+        }
+
+        bool operator==(const iterator& rhs) {return ptr_ == rhs.ptr_; }
+    };
 
     Tree() {
         tree_nil_ = new Node(T());
@@ -113,25 +145,34 @@ public:
     void insert(const T& key);
 
     iterator get_root() const {
-        return root_;
+        return iterator(root_);
     }
 
     iterator lower_bound(const T& key) const;
     iterator upper_bound(const T& key) const;
 
-    int distance(iterator fst, iterator snd) const;
+    int distance(iterator fst, iterator snd) const {
+        int dst = 0;
+        while (fst != snd) {
+            dst++;
+            ++fst;
+        }
+
+        return dst;
+    }
 
     /* DEBUG FUNCTIONS HERE */
-    void print_sorted(std::ostream &stream, iterator node) const;
+    void print_sorted(std::ostream &stream, const iterator it) const;
 
-    void print_debug(std::ostream &stream, iterator node, unsigned indent = 0) const;
+    void print_debug(std::ostream &stream, const iterator it, const unsigned indent = 0) const;
 
-    void print_dot_debug(std::ostream &stream, iterator node) const;
+    void print_dot_debug(std::ostream &stream, const iterator it) const;
 
 };
 
 template <typename T, typename CompT>
-void Tree<T, CompT>::print_sorted(std::ostream &stream, iterator node) const {
+void Tree<T, CompT>::print_sorted(std::ostream &stream, const iterator it) const {
+    const Node *node = it.ptr_;
     if (node == tree_nil_)
         return;
 
@@ -141,7 +182,8 @@ void Tree<T, CompT>::print_sorted(std::ostream &stream, iterator node) const {
 }
 
 template <typename T, typename CompT>
-void Tree<T, CompT>::print_debug(std::ostream &stream, iterator node, unsigned indent) const {
+void Tree<T, CompT>::print_debug(std::ostream &stream, const iterator it, const unsigned indent) const {
+    const Node *node = it.ptr_;
     if (node == tree_nil_)
         return;
 
@@ -158,7 +200,7 @@ void Tree<T, CompT>::print_debug(std::ostream &stream, iterator node, unsigned i
 }
 
 template <typename T, typename CompT>
-void Tree<T, CompT>::print_dot_debug_recursive(std::ostream &stream, iterator node) const {
+void Tree<T, CompT>::print_dot_debug_recursive(std::ostream &stream, const Node *node) const {
     if (node == tree_nil_)
         return;
 
@@ -179,10 +221,10 @@ void Tree<T, CompT>::print_dot_debug_recursive(std::ostream &stream, iterator no
 }
 
 template <typename T, typename CompT>
-void Tree<T, CompT>::print_dot_debug(std::ostream &stream, iterator node) const {
+void Tree<T, CompT>::print_dot_debug(std::ostream &stream, const iterator it) const {
     stream << "digraph {\n"
               "graph [splines=line]\n";
-    print_dot_debug_recursive(stream, node);
+    print_dot_debug_recursive(stream, it.ptr_);
     stream << "}\n";
 }
 
@@ -365,7 +407,7 @@ Tree<T, CompT>::iterator Tree<T, CompT>::lower_bound(const T& key) const {
             return node;
         }
     }
-    return last_closest;
+    return iterator(last_closest);
 }
 
 /// Returns an iterator pointing to the first element that is greater than key.
@@ -386,7 +428,7 @@ Tree<T, CompT>::iterator Tree<T, CompT>::upper_bound(const T& key) const {
             break;
         }
     }
-    return last_closest;
+    return iterator(last_closest);
 }
 
 
