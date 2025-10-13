@@ -3,6 +3,16 @@
 
 #include "rbtree.hpp"
 
+void check_cin(const std::string err_msg);
+
+void check_cin(const std::string err_msg) {
+    if (!std::cin.good()) {
+        std::cerr << err_msg;
+        exit(EXIT_FAILURE);
+    }
+    return;
+}
+
 int main(int argc, const char *argv[]) {
     bool verbose = false;
 
@@ -17,25 +27,39 @@ int main(int argc, const char *argv[]) {
 
     std::string input = "";
     while (std::cin >> input) {
+        check_cin("Failed to read input\n");
+
         if (input == "k") {
             int key = 0;
             std::cin >> key;
+            check_cin("Failed to read key\n");
             tree.insert(key);
+
             if (verbose) std::cout << "Add key " << key << "\n";
         } else if (input == "q") {
             int fst = 0, snd = 0;
-            std::cin >> fst >> snd;
+            std::cin >> fst;
+            check_cin("Failed to read first key\n");
+
+            std::cin >> snd;
+            check_cin("Failed to read second key\n");
+
             if (verbose) std::cout << "Range query " << fst << " " << snd << "\n";
             std::cout << tree.distance(tree.lower_bound(fst), tree.upper_bound(snd)) << " ";
         } else if (input == "l") {
             int left = 0;
             std::cin >> left;
+            check_cin("Failed to read key\n");
             if (verbose) std::cout << "Lower bound " << *tree.lower_bound(left) << "\n";
         } else if (input == "u") {
             int right = 0;
             std::cin >> right;
+            check_cin("Failed to read key\n");
             RBTree::Tree<int>::iterator upper = tree.upper_bound(right);
             if (verbose) std::cout << "Upper bound " << *upper << "\n";
+        } else {
+            std::cerr << "Unexpected keyword:" << input << "\n";
+            exit(EXIT_FAILURE);
         }
     }
     std::cout << "\n";
