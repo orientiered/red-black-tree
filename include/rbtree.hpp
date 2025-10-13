@@ -6,6 +6,8 @@
 #include <string>
 #include <cassert>
 
+#include "gtest/gtest.h"
+
 namespace RBTree {
 
 enum class Order {
@@ -103,6 +105,8 @@ public:
 
             }
         }
+
+        FRIEND_TEST(TreeItTest, Op_successor);
 
         bool is_end() const {
             return ptr_->is_nil();
