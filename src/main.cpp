@@ -38,9 +38,6 @@ int main(int argc, const char *argv[]) {
             if (verbose) std::cout << "Upper bound " << *upper << "\n";
         }
     }
-
-
-    tree.print_sorted(std::cout, tree.get_root());
     std::cout << "\n";
 
     if (verbose) {
