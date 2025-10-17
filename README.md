@@ -5,7 +5,7 @@ Red-black tree implementation in C++.
 ## Build
 
 ```bash
-git submodule update --recursive
+git submodule update --init
 cmake -B build
 cmake --build build
 ```
