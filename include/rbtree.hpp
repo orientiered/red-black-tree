@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "gtest/gtest.h"
+#include "gtest/gtest_prod.h"
 
 namespace RBTree {
 
@@ -44,6 +45,7 @@ class Tree {
 
         Node(const T& key, Color color = Color::black) : key_(key), color_(color) {}
         Node(const T& key, Node * parent, Color color = Color::black) : key_(key), parent_(parent), color_(color) {}
+        Node(const T& key, Node * parent, Node * left, Node * right, Color color = Color::black) : key_(key), parent_(parent), left_(left), right_(right), color_(color) {}
 
         Node(const Node& rhs) = delete;
         Node &operator=(const Node& rhs) = delete;
@@ -105,8 +107,6 @@ public:
 
             }
         }
-
-        FRIEND_TEST(TreeItTest, Op_successor);
 
         bool is_end() const {
             return ptr_->is_nil();
@@ -172,6 +172,8 @@ public:
 
     void print_dot_debug(std::ostream &stream, const iterator it) const;
 
+    FRIEND_TEST(RotateTest, LeftRotate);
+    FRIEND_TEST(RotateTest, RightRotate);
 };
 
 template <typename T, typename CompT>
