@@ -8,6 +8,38 @@ using TreeInt = Tree<int>;
 
 #define NIL tree.tree_nil_
 
+/***************  MOVE  ****************/
+TEST(Move, Ctor) {
+    using Node = TreeInt::Node;
+    TreeInt tree;
+
+    auto old_root = tree.root_ = new Node(2, NIL);
+    auto old_left  = tree.root_->left_  = new Node(1, tree.root_, NIL, NIL);
+    auto old_right = tree.root_->right_ = new Node(3, tree.root_, NIL, NIL);
+
+    TreeInt tree2(std::move(tree));
+    EXPECT_NE(tree.tree_nil_, tree2.tree_nil_);
+    EXPECT_NE(tree.root_, tree2.root_);
+    EXPECT_EQ(tree.root_->parent_, tree.tree_nil_);
+    EXPECT_EQ(tree2.root_->parent_, tree2.tree_nil_);
+}
+
+TEST(Move, Assign) {
+    using Node = TreeInt::Node;
+    TreeInt tree;
+
+    auto old_root = tree.root_ = new Node(2, NIL);
+    auto old_left  = tree.root_->left_  = new Node(1, tree.root_, NIL, NIL);
+    auto old_right = tree.root_->right_ = new Node(3, tree.root_, NIL, NIL);
+
+    TreeInt tree2;
+    tree2 = std::move(tree);
+    EXPECT_NE(tree.tree_nil_, tree2.tree_nil_);
+    EXPECT_NE(tree.root_, tree2.root_);
+    EXPECT_EQ(tree.root_->parent_, tree.tree_nil_);
+    EXPECT_EQ(tree2.root_->parent_, tree2.tree_nil_);
+}
+
 /*************** ROTATE ****************/
 TEST(RotateTest, LeftRotate) {
     using Node = TreeInt::Node;

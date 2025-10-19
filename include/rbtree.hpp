@@ -79,6 +79,7 @@ class Tree {
     void insert_fixup(Node *node);
 
     void print_dot_debug_recursive(std::ostream &stream, const Node *node) const;
+
 public:
     struct iterator {
         const Node *ptr_;
@@ -144,6 +145,25 @@ public:
 
     Tree(const Tree& rhs) = delete;
     Tree &operator=(const Tree& rhs) = delete;
+
+    Tree(Tree&& rhs): tree_nil_(rhs.tree_nil_), root_(rhs.root_) {
+        rhs.tree_nil_ = new Node(T());
+        rhs.tree_nil_->make_nil();
+        rhs.root_ = rhs.tree_nil_;
+    }
+    FRIEND_TEST(Move, Ctor);
+
+    Tree &operator=(Tree&& rhs) {
+        if (&rhs == this)
+            return *this;
+
+        std::swap(rhs.root_, root_);
+        std::swap(rhs.tree_nil_, tree_nil_);
+
+        return *this;
+    }
+    FRIEND_TEST(Move, Assign);
+
 
     void insert(const T& key);
 
