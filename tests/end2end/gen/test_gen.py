@@ -28,7 +28,7 @@ for test_len in test_lens:
                     test_file.write(f"k {random.randint(1, unique_elems)} ")
 
                 query_left  = random.randint(1, unique_elems)
-                query_right = random.randint(query_left, unique_elems)
+                query_right = random.randint(1, unique_elems)
                 test_file.write(f"q {query_left} {query_right} ")
 
 os.system("g++ reference.cpp -o reference")

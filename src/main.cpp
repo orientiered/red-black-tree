@@ -36,7 +36,8 @@ int main(int argc, const char *argv[]) {
             tree.insert(key);
 
             if (verbose) std::cout << "Add key " << key << "\n";
-        } else if (input == "q") {
+        }
+        else if (input == "q") {
             int fst = 0, snd = 0;
             std::cin >> fst;
             check_cin("Failed to read first key\n");
@@ -45,19 +46,13 @@ int main(int argc, const char *argv[]) {
             check_cin("Failed to read second key\n");
 
             if (verbose) std::cout << "Range query " << fst << " " << snd << "\n";
-            std::cout << tree.distance(tree.lower_bound(fst), tree.upper_bound(snd)) << " ";
-        } else if (input == "l") {
-            int left = 0;
-            std::cin >> left;
-            check_cin("Failed to read key\n");
-            if (verbose) std::cout << "Lower bound " << *tree.lower_bound(left) << "\n";
-        } else if (input == "u") {
-            int right = 0;
-            std::cin >> right;
-            check_cin("Failed to read key\n");
-            RBTree::Tree<int>::iterator upper = tree.upper_bound(right);
-            if (verbose) std::cout << "Upper bound " << *upper << "\n";
-        } else {
+
+            int distance = 0;
+            if (snd > fst) distance = tree.distance(tree.upper_bound(fst), tree.upper_bound(snd));
+
+            std::cout << distance << " ";
+        }
+        else {
             std::cerr << "Unexpected keyword:" << input << "\n";
             exit(EXIT_FAILURE);
         }

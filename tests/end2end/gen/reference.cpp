@@ -16,13 +16,18 @@ int main() {
             int fst = 0, snd = 0;
             std::cin >> fst >> snd;
 
-            auto lower = set.lower_bound(fst);
-            auto upper = set.upper_bound(snd);
+            int dist = 0;
+            if (snd > fst) {
+                auto lower = set.upper_bound(fst);
+                auto upper = set.upper_bound(snd);
 
-            auto dist = std::distance(lower, upper);
+                dist = std::distance(lower, upper);
+            }
 
             std::cout << dist << " ";
         }
     }
     std::cout << "\n";
+
+    return 0;
 }
