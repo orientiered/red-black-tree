@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "rbtree.hpp"
+#include "rbtree_debug.hpp"
 
 void check_cin(const std::string err_msg);
 
@@ -68,7 +69,7 @@ int main(int argc, const char *argv[]) {
         }
         tree.print_dot_debug(file, tree.get_root());
         file.close();
-        std::system(("dot " + file_name + " -Tpng -o graph.png").c_str());
+        (void) std::system(("dot " + file_name + " -Tsvg -o graph.svg").c_str());
     }
 
     return 0;
