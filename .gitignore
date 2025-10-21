@@ -1,4 +1,4 @@
 build
 .cache
 *.log
-tests/gen/reference
+tests/end2end/gen/reference

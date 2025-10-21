@@ -18,7 +18,7 @@ int main() {
 
             int dist = 0;
             if (snd > fst) {
-                auto lower = set.upper_bound(fst);
+                auto lower = set.lower_bound(fst);
                 auto upper = set.upper_bound(snd);
 
                 dist = std::distance(lower, upper);

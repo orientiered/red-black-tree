@@ -49,7 +49,7 @@ int main(int argc, const char *argv[]) {
             if (verbose) std::cout << "Range query " << fst << " " << snd << "\n";
 
             int distance = 0;
-            if (snd > fst) distance = tree.distance(tree.upper_bound(fst), tree.upper_bound(snd));
+            if (snd > fst) distance = tree.distance(tree.lower_bound(fst), tree.upper_bound(snd));
 
             std::cout << distance << " ";
         }
