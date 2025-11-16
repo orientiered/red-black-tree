@@ -2,3 +2,4 @@ build
 .cache
 *.log
 tests/end2end/gen/reference
+tests/bench/results

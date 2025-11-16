@@ -38,3 +38,28 @@ ctest -L unit
 # only end-to-end
 ctest -L end2end
 ```
+
+## Benchmarking
+
+Our tree implementation can be benchmarked against `std::set` with google benchmark using cmake target `bench`:
+```bash
+cmake --build build --target bench
+```
+
+Benchmark data files are taken from [`bench_test_list.txt`](/tests/bench/bench_test_list.txt)
+
+Output example:
+```
+Implementation: std::set
+-----------------------------------------------------
+Benchmark           Time             CPU   Iterations
+-----------------------------------------------------
+100k 1           1006 ms          987 ms            1
+100k 2            987 ms          969 ms            1
+100k 3            947 ms          932 ms            1
+100k 4            957 ms          944 ms            1
+10k 1            4.91 ms         4.85 ms          137
+10k 2            4.91 ms         4.86 ms          139
+10k 3            5.06 ms         5.01 ms          132
+10k 4            4.78 ms         4.74 ms          147
+```

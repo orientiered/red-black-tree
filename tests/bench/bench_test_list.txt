@@ -1,0 +1,8 @@
+"100k 1", "tests/end2end/auto_test_100000_0.dat"
+"100k 2", "tests/end2end/auto_test_100000_1.dat"
+"100k 3", "tests/end2end/auto_test_100000_2.dat"
+"100k 4", "tests/end2end/auto_test_100000_3.dat"
+"10k 1", "tests/end2end/auto_test_10000_2.dat"
+"10k 2", "tests/end2end/auto_test_10000_3.dat"
+"10k 3", "tests/end2end/auto_test_10000_4.dat"
+"10k 4", "tests/end2end/auto_test_10000_5.dat"
