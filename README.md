@@ -41,9 +41,10 @@ ctest -L end2end
 
 ## Benchmarking
 
-Our tree implementation can be benchmarked against `std::set` with google benchmark using cmake target `bench`:
+Our tree implementation can be benchmarked against `std::set` with **google benchmark** using cmake targets `bench_rbtree`, `bench_stdset` and `bench` for comparison:
 ```bash
 cmake --build build --target bench
+# run both benchmarks and compare results
 ```
 
 Benchmark data files are taken from [`bench_test_list.txt`](/tests/bench/bench_test_list.txt)
