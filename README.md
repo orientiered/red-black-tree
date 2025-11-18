@@ -10,6 +10,13 @@ cmake -B build
 cmake --build build
 ```
 
+### Dependencies
+
+For benchmarking (`bench` CMake target) you may need to install `numpy` and `scipy`:
+```bash
+pip install numpy scipy
+```
+
 ## Using
 
 __Input format__: sequence of insert or range queries with form _"k &lt;int&gt;"_ or _"q &lt;int&gt; &lt;int&gt;"_ respectively.

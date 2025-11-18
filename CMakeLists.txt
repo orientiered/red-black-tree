@@ -38,6 +38,7 @@ target_link_libraries(${unit_test_exec_name} gtest_main)
 add_executable(${benchmark_exec_name} tests/bench/tree_bench.cpp)
 target_include_directories(${benchmark_exec_name} PUBLIC include)
 target_include_directories(${benchmark_exec_name} PUBLIC benchmark/include)
+target_include_directories(${benchmark_exec_name} PUBLIC googletest/googletest/include)
 target_link_libraries(${benchmark_exec_name} benchmark_main)
 
 # Std set implementation for test generation
