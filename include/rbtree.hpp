@@ -42,6 +42,8 @@ class Tree {
 
         Color color_ = Color::black;
 
+        std::size_t tree_size_ = 1;
+
         Node(const T& key, Color color = Color::black) : key_(key), color_(color) {}
         Node(const T& key, Node * parent, Color color = Color::black) : key_(key), parent_(parent), color_(color) {}
         Node(const T& key, Node * parent, Node * left, Node * right, Color color = Color::black) : key_(key), parent_(parent), left_(left), right_(right), color_(color) {}
@@ -56,6 +58,7 @@ class Tree {
             right_  = this;
             left_   = this;
             color_ = Color::black;
+            tree_size_ = 0;
         }
     };
 
@@ -79,6 +82,8 @@ class Tree {
     void insert_fixup(Node *node);
 
     void print_dot_debug_recursive(std::ostream &stream, const Node *node) const;
+
+    bool validate_subtree(const Node *node) const;
 
 public:
     struct iterator {
@@ -174,14 +179,39 @@ public:
     iterator lower_bound(const T& key) const;
     iterator upper_bound(const T& key) const;
 
-    int distance(iterator fst, iterator snd) const {
-        int dst = 0;
-        while (fst != snd) {
-            dst++;
-            ++fst;
+    std::size_t distance(const iterator fst, const iterator snd) const {
+        /*
+            Main idea: use subtree sizes to find distance in O(log n)
+            find all elements that >= fst ( = dst1)
+            find all elements that >= snd ( = dst2)
+            Answer is dst1 - dst2
+            Tree_nil is expected to have zero tree size
+        */
+        const Node *fst_ptr = fst.ptr_;
+        const Node *snd_ptr = snd.ptr_;
+
+        std::size_t dst1 = 0, dst2 = 0;
+        const Node *cur = fst_ptr;
+
+        dst1 += cur->tree_size_ - cur->left_->tree_size_;
+        while (cur != tree_nil_) {
+            if (cur == cur->parent_->left_) {
+                dst1 += cur->parent_->tree_size_ - cur->tree_size_;
+            }
+            cur = cur->parent_;
         }
 
-        return dst;
+        cur = snd_ptr;
+
+        dst2 += cur->tree_size_ - cur->left_->tree_size_;
+        while (cur != tree_nil_) {
+            if (cur == cur->parent_->left_) {
+                dst2 += cur->parent_->tree_size_ - cur->tree_size_;
+            }
+            cur = cur->parent_;
+        }
+
+        return dst1 - dst2;
     }
 
     /* DEBUG FUNCTIONS HERE */
@@ -190,6 +220,8 @@ public:
     void print_debug(std::ostream &stream, const iterator it, const unsigned indent = 0) const;
 
     void print_dot_debug(std::ostream &stream, const iterator it) const;
+
+    bool validate() const;
 
     FRIEND_TEST(RotateTest, LeftRotate);
     FRIEND_TEST(RotateTest, RightRotate);
@@ -227,6 +259,13 @@ void Tree<T, CompT>::insert(const T& key) {
         prev->left_ = new_node;
     } else {
         prev->right_ = new_node;
+    }
+
+    // go up to update sizes
+    cur = prev;
+    while (cur != tree_nil_) {
+        cur->tree_size_ += 1;
+        cur = cur->parent_;
     }
 
     insert_fixup(new_node);
@@ -280,7 +319,7 @@ void Tree<T, CompT>::left_rotate(Node *node) {
     /*
           x                y
         a   y    -->     x   c
-      b   c            a   b
+          b   c        a   b
     */
     assert(node);
     if (node->right_ == tree_nil_) return;
@@ -312,6 +351,9 @@ void Tree<T, CompT>::left_rotate(Node *node) {
 
     y->left_ = x;
     x->parent_ = y;
+
+    x->tree_size_ = 1 + x->left_->tree_size_ + x->right_->tree_size_;
+    y->tree_size_ = 1 + y->left_->tree_size_ + y->right_->tree_size_;
 }
 
 template <typename T, typename CompT>
@@ -351,6 +393,10 @@ void Tree<T, CompT>::right_rotate(Node *node) {
 
     y->right_ = x;
     x->parent_ = y;
+
+    // refresh sizes
+    x->tree_size_ = 1 + x->left_->tree_size_ + x->right_->tree_size_;
+    y->tree_size_ = 1 + y->left_->tree_size_ + y->right_->tree_size_;
 }
 
 /// Returns an iterator pointing to the first element that is not less than key.
@@ -396,5 +442,27 @@ Tree<T, CompT>::iterator Tree<T, CompT>::upper_bound(const T& key) const {
     return iterator(last_closest);
 }
 
+template <typename T, typename CompT>
+bool Tree<T, CompT>::validate_subtree(const Node *node) const {
+    if (node->is_nil()) return node->tree_size_ == 0;
+
+    if (!validate_subtree(node->left_)) {
+        return false;
+    }
+    if (!validate_subtree(node->right_)) {
+        return false;
+    }
+
+    if (node->left_->tree_size_ + node->right_->tree_size_ + 1 != node->tree_size_) {
+        return false;
+    }
+
+    return true;
+}
+
+template <typename T, typename CompT>
+bool Tree<T, CompT>::validate() const {
+    return validate_subtree(root_);
+}
 
 } // namespace RBTree
